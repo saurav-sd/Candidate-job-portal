@@ -1,0 +1,7 @@
+.job-card {
+    transition: transform 0.3s;
+}
+  
+.job-card:hover {
+transform: scale(1.05); /* Adjust the scale factor as needed */
+}
