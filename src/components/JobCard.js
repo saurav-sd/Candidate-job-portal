@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -10,6 +10,10 @@ import './JobCard.css';
 
 function JobCard({ jobData }) {
   const [showFullContent, setShowFullContent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [jobList, setJobList] = useState([]); // Initialize jobList state as an empty array
+
   const toggleFullContent = () => {
     setShowFullContent(!showFullContent);
   };
@@ -24,10 +28,70 @@ function JobCard({ jobData }) {
     // Add more currencies as needed
   };
 
+  // Function to load more job data
+  const loadMoreData = async () => {
+    setIsLoading(true);
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      const raw = JSON.stringify({
+        limit: 10,
+        offset: offset + 10, // Increment offset to fetch the next set of data
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+      };
+
+      const response = await fetch(
+        "https://api.weekday.technology/adhoc/getSampleJdJSON",
+        requestOptions
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch job data");
+      }
+
+      const newData = await response.json();
+      setOffset(offset + 10); // Update offset
+      setIsLoading(false);
+
+      // Append new job data to existing list
+      setJobList((prevData) => [...prevData, ...newData.jdList]);
+    } catch (error) {
+      console.error("Failed to fetch job data:", error);
+      setIsLoading(false);
+    }
+  };
+
+  // Function to handle scroll event
+  const handleScroll = () => {
+    const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 20 && !isLoading) {
+      loadMoreData();
+    }
+  };
+
+  // Add scroll event listener when component mounts
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); // Empty dependency array ensures the effect runs only once
+
+  // Update jobList state when jobData prop changes
+  useEffect(() => {
+    setJobList(jobData || []); // Update jobList with jobData if it exists, otherwise set it to an empty array
+  }, [jobData]);
+
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-      {jobData &&
-        jobData.map((job) => (
+      {jobList &&
+        jobList.map((job) => (
           <Card
             key={job.jdUid}
             sx={{ minWidth: 200, maxWidth: 300, margin: 5 }}
@@ -93,6 +157,7 @@ function JobCard({ jobData }) {
             </CardActions>
           </Card>
         ))}
+      {isLoading && <div>Loading...</div>}
     </Box>
   );
 }
