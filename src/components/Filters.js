@@ -1,17 +1,23 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect} from 'react'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { Autocomplete } from '@mui/material';
 
-function Filters({jobData, onFilterChange}) {
+function Filters({jobData, onFilterChange, onFilterDataChange}) {
     const [role, setRole] = useState('');
     const [location, setLocation] = useState('');
     const [experience, setExperience] = useState('');
     const [salary, setSalary] = useState('');
-    const [filteredData, setFilteredData] = useState(jobData || []);
+  const [filteredData, setFilteredData] = useState(jobData || []);
+
+
+    useEffect(() => {
+        // Initialize filteredJobData with jobData
+        setFilteredData(jobData || []);
+    }, [jobData]);
     
 
-    console.log("jobData= ", jobData)
+    // console.log("jobData= ", jobData)
     // JobRole
     const roles = jobData ? [...new Set(jobData.map(job => job.jobRole))] : []; // Extract unique job roles from jobData
     const filteredRoles = roles.filter(role => role.toLowerCase().includes(role.toLowerCase()));
@@ -22,77 +28,124 @@ function Filters({jobData, onFilterChange}) {
 
     //Minimum experience
     const experiences = jobData ? [...new Set(jobData.map(job => job.minExp))] : []; // Extract unique Experience from jobData
-    const filteredExperience = experiences.filter((experience, index, self) => self.indexOf(experience) === index).sort((a, b) => a - b);;
-
-    console.log("filteredExperience=", filteredExperience);
+    const filteredExperience = experiences.filter((experience, index, self) => self.indexOf(experience) === index).sort((a, b) => a - b);
 
     //Minimum Salary
     const salaries = jobData ? [...new Set(jobData.map(job => job.minJdSalary))] : []; // Extract unique Salary from jobData
     const filteredSalary = salaries.filter((salary,index,self) => self.indexOf(salary) === index).sort((a, b) => a - b);
 
-    console.log("filteredRoles=", filteredRoles);
     console.log("filteredData=", filteredData);
+  
+  //change
+
+  const applyFilters = () => {
+    let newData = jobData;
+
+    if (role) {
+        newData = newData.filter(job => job.jobRole.toLowerCase() === role.toLowerCase());
+    }
+    if (location) {
+        newData = newData.filter(job => job.location.toLowerCase() === location.toLowerCase());
+    }
+    if (experience) {
+        newData = newData.filter(job => job.minExp === experience);
+    }
+    if (salary) {
+        newData = newData.filter(job => job.minJdSalary === salary);
+    }
+
+    setFilteredData(newData);
+    onFilterChange(newData);
+};
     
     const handleJobChange = (event, newValue) => {
         console.log("newvalue =", newValue);
-        // const selectedRole = event.target?.value || ''; // Get the selected value from newValue
-        setRole(newValue, event.target.value);
+        setRole(newValue);
     
         // Filter jobData based on selected role and update filteredData
-        const filteredData = jobData.filter(job => job.jobRole.toLowerCase() === newValue?.toLowerCase());
-        setFilteredData(filteredData);
-        onFilterChange(filteredData);
+        const filteredDataa = filteredData.filter(job => job.jobRole.toLowerCase() === newValue?.toLowerCase());
+        setFilteredData(filteredDataa);
+      onFilterChange(filteredDataa);
+      onFilterDataChange(true);
     
-        console.log("filteredData=", filteredData);
+        console.log("filteredData==> ", filteredDataa);
     };
 
     const handleLocationChange = (event, newValue) => {
         console.log("newvalue =", newValue);
-        // const selectedRole = event.target?.value || ''; // Get the selected value from newValue
-        setLocation(newValue, event.target.value);
+        setLocation(newValue);
     
         // Filter jobData based on selected role and update filteredData
-        const filteredData = jobData.filter(job => job.location.toLowerCase() === newValue?.toLowerCase());
-        setFilteredData(filteredData);
-        onFilterChange(filteredData);
-    
-        console.log("filteredData=", filteredData);
+        const filteredDataa = filteredData.filter(job => job.location.toLowerCase() === newValue?.toLowerCase());
+        setFilteredData(filteredDataa);
+      onFilterChange(filteredDataa);
+      onFilterDataChange(true);
+      
+      console.log("filteredData==> ", filteredData);
     };
 
     const handleExperienceChange = (event, newValue) => {
         console.log("newvalue =", newValue);
-        // const selectedRole = event.target?.value || ''; // Get the selected value from newValue
-        setExperience(newValue, event.target.value);
+        setExperience(newValue);
     
         // Filter jobData based on selected role and update filteredData
-        const filteredData = jobData.filter(job => (job.minExp != null && job.minExp === newValue));
-        setFilteredData(filteredData);
-        onFilterChange(filteredData);
-    
-        console.log("filteredData=", filteredData);
+        const filteredDataa = filteredData.filter(job => (job.minExp != null && job.minExp === newValue));
+        setFilteredData(filteredDataa);
+      onFilterChange(filteredDataa);
+      onFilterDataChange(true);
     };
 
     const handleSalaryChange = (event, newValue) => {
         console.log("newvalue =", newValue);
-        // const selectedRole = event.target?.value || ''; // Get the selected value from newValue
-        setSalary(newValue, event.target.value);
+        setSalary(newValue);
     
         // Filter jobData based on selected role and update filteredData
-        const filteredData = jobData.filter(job => (job.minJdSalary !== null && job.minJdSalary === newValue));
-        setFilteredData(filteredData);
-        onFilterChange(filteredData);
+        const filteredDataa = filteredData.filter(job => (job.minJdSalary !== null && job.minJdSalary === newValue));
+        setFilteredData(filteredDataa);
+      onFilterChange(filteredDataa);
+      onFilterDataChange(true);
     
         console.log("filteredData=", filteredData);
+  }
+  
+  const handleClearFilter = (filterName) => {
+    switch (filterName) {
+        case 'role':
+            setRole('');
+            break;
+        case 'location':
+            setLocation('');
+            break;
+        case 'experience':
+            setExperience('');
+            break;
+        case 'salary':
+            setSalary('');
+            break;
+        default:
+            break;
     }
+
+    applyFilters();
+};
+
+useEffect(() => {
+    applyFilters();
+}, [role, location, experience, salary]);
     
     const getOptionLabel = (option) => option;
     
   return (
-    <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+    <Box sx={{display: 'flex', justifyContent: 'center'}}>
       <Autocomplete
         options={filteredRoles}
         getOptionLabel={getOptionLabel}
         onChange={handleJobChange}
+        onInputChange={(event, newInputValue) => {
+          if (!newInputValue) {
+            handleClearFilter();
+          }
+      }}
         renderInput={(params) => (
           <TextField
             {...params}

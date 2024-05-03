@@ -8,6 +8,8 @@ function App() {
 
   const [jobData, setJobData] = useState(null);
   const [filteredData, setFilteredData] = useState(null);
+  // const [originalData, setOriginalData] = useState(null);
+  const [filteredDataChange, setFilteredDataChange] = useState(false);
 
   useEffect(() => {
     const fetchJobData = async () => {
@@ -25,18 +27,22 @@ function App() {
 
   const handleFilterChange = (filteredData) => {
     setFilteredData(filteredData);
-};
+  };
+  
+  const handleFilterDataChange = () => {
+    setFilteredDataChange(true); // Reset filteredData to original unfiltered data
+  };
   
 
   
   return (
     <div className="App">
-      <Filters jobData={jobData} onFilterChange={handleFilterChange}/>
-      {filteredData && filteredData.length > 0 ? (
-            <JobCard jobData={filteredData} />
-        ) : (
-            <JobCard jobData={jobData} />
-        )}
+      <Filters jobData={jobData} onFilterChange={handleFilterChange} onFilterDataChange={handleFilterDataChange} />
+      {(filteredDataChange && filteredData === null) ? (
+        <div className="no-data-message">No data found.</div>
+      ) : (
+        <JobCard jobData={filteredDataChange ? filteredData : jobData} />
+      )}
     </div>
   );
 }

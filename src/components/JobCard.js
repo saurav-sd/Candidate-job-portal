@@ -12,20 +12,17 @@ function JobCard({ jobData }) {
   const [showFullContent, setShowFullContent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [jobList, setJobList] = useState([]); // Initialize jobList state as an empty array
+  const [jobList, setJobList] = useState([]);
 
   const toggleFullContent = () => {
     setShowFullContent(!showFullContent);
   };
-
-  console.log("job data", jobData);
 
   const currencySymbols = {
     USD: "$",
     INR: "₹",
     EUR: "€",
     GBP: "£",
-    // Add more currencies as needed
   };
 
   // Function to load more job data
@@ -88,9 +85,14 @@ function JobCard({ jobData }) {
     setJobList(jobData || []); // Update jobList with jobData if it exists, otherwise set it to an empty array
   }, [jobData]);
 
+  // console.log("JobList : ", jobList);
+  // console.log("JobData : ", jobData);
+
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-      {jobList &&
+      {jobList.length === 0 ? (
+        <Typography variant="h5">No jobs found.</Typography>
+      ) :(jobList &&
         jobList.map((job) => (
           <Card
             key={job.jdUid}
@@ -148,15 +150,15 @@ function JobCard({ jobData }) {
             </CardContent>
             <CardActions style={{ display: "flex", justifyContent: "center" }}>
               <Button
-                        variant="contained"
-                        component="a"
-                        href={job.jdLink}
+              variant="contained"
+              component="a"
+              href={job.jdLink}
               >
                 Easy Apply
               </Button>
             </CardActions>
           </Card>
-        ))}
+        )))}
       {isLoading && <div>Loading...</div>}
     </Box>
   );
